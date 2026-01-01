@@ -3,205 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus AI - Smart Health Hub</title>
+    <title>Nexus AI 5.0 - Intelligence & Performance</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .progress-transition { transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .dark { background-color: #020617; color: #f8fafc; }
-        .dark .bg-white { background-color: #0f172a; color: #f8fafc; border-color: #1e293b; }
-        @keyframes nexus-glow { 0%, 100% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.3); } 50% { box-shadow: 0 0 30px rgba(34, 211, 238, 0.6); } }
-        .nexus-border { animation: nexus-glow 4s infinite; border: 1px solid rgba(34, 211, 238, 0.2); }
-        .nexus-gradient { background: linear-gradient(135deg, #1e1b4b 0%, #1e40af 100%); }
+        .active-tab { border-bottom: 4px solid #06b6d4; color: #06b6d4; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .progress-bar { transition: width 1s ease-in-out; }
     </style>
 </head>
-<body id="body" class="bg-slate-50 font-sans text-slate-800 pb-32 transition-colors duration-500">
+<body class="bg-slate-900 text-slate-100 font-sans pb-24">
 
-    <header class="bg-white p-4 shadow-md border-b border-slate-100 flex justify-between items-center sticky top-0 z-50">
+    <header class="p-6 flex justify-between items-center bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
         <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-2xl overflow-hidden border-2 border-cyan-500 shadow-lg shadow-cyan-500/20">
-                <img src="https://image.pollinations.ai/prompt/nexus%20health%20ai%20logo%20minimalist%20node%20cyan%20blue%20dark%20background?width=100&height=100" alt="Nexus Logo" class="w-full h-full object-cover">
-            </div>
-            <div>
-                <h1 class="text-xl font-black text-blue-700 tracking-tighter leading-none uppercase">Nexus <span class="text-cyan-500">AI</span></h1>
-                <p id="xp-texto" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic">Core Level 1 • 0 XP</p>
-            </div>
+            <div class="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center font-black text-slate-900 shadow-lg shadow-cyan-500/20">N</div>
+            <h1 class="text-xl font-bold tracking-tighter uppercase">Nexus <span class="text-cyan-400">AI</span></h1>
         </div>
-        <button onclick="toggleDarkMode()" class="p-2 bg-slate-100 dark:bg-slate-800 rounded-2xl shadow-inner text-lg">🌓</button>
+        <div class="text-right">
+            <p id="xp-texto" class="text-[10px] font-bold text-cyan-400">LVL 1 • 0 XP</p>
+        </div>
     </header>
 
-    <main class="p-4 max-w-md mx-auto space-y-6">
-        
-        <section class="bg-slate-900 p-5 rounded-[2.5rem] text-white shadow-2xl border-b-4 border-cyan-500">
-            <h3 class="text-[9px] font-black uppercase tracking-[0.3em] text-cyan-400 mb-2">Protocolo de Foco</h3>
-            <textarea id="mural-objetivo" oninput="salvarObjetivo()" 
-                class="bg-transparent w-full text-lg font-bold outline-none resize-none placeholder:text-slate-700" 
-                placeholder="Defina sua diretriz..."></textarea>
-        </section>
+    <nav class="flex justify-around bg-slate-800/50 border-b border-slate-700 mb-6 sticky top-[80px] z-40 backdrop-blur-md">
+        <button onclick="openTab(event, 'dash')" class="tab-link p-4 font-black text-xs uppercase active-tab">Início</button>
+        <button onclick="openTab(event, 'treinos')" class="tab-link p-4 font-black text-xs uppercase">Agenda AI</button>
+        <button onclick="openTab(event, 'stats')" class="tab-link p-4 font-black text-xs uppercase">Evolução</button>
+    </nav>
 
-        <section class="nexus-gradient p-6 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden nexus-border">
-            <div class="relative z-10 flex gap-4 items-start">
-                <div class="flex-shrink-0">
-                    <div class="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-md flex items-center justify-center border border-cyan-500/30 overflow-hidden shadow-inner">
-                         <img src="https://image.pollinations.ai/prompt/futuristic%20nexus%20ai%20cyborg%20humanoid%20blue%20neon%20lights%20health%20fitness%20avatar?width=150&height=150" alt="Nexus AI Avatar" class="w-full h-full object-cover">
+    <main class="max-w-md mx-auto px-4">
+
+        <div id="dash" class="tab-content active space-y-6">
+            <section class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 shadow-xl">
+                <div class="flex justify-between items-end mb-4">
+                    <h2 class="text-xs font-black uppercase text-slate-400">Meta Diária</h2>
+                    <span id="perc-texto" class="text-2xl font-black text-cyan-400 italic">0%</span>
+                </div>
+                <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                    <div id="barra-progresso" class="progress-bar bg-cyan-500 h-full w-0"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 mt-6">
+                    <div class="text-center"><span id="m-prot" class="block font-bold">0g</span><span class="text-[8px] text-slate-500 uppercase">Prot</span></div>
+                    <div class="text-center"><span id="m-carb" class="block font-bold">0g</span><span class="text-[8px] text-slate-500 uppercase">Carb</span></div>
+                    <div class="text-center"><span id="m-gord" class="block font-bold">0g</span><span class="text-[8px] text-slate-500 uppercase">Gord</span></div>
+                </div>
+            </section>
+
+            <section class="bg-gradient-to-br from-cyan-600 to-blue-700 p-6 rounded-[2rem] shadow-2xl relative overflow-hidden">
+                <div class="flex items-start gap-4">
+                    <img src="https://image.pollinations.ai/prompt/nexus%20ai%20robot%20head%20cyan%20neon?width=80&height=80" class="w-14 h-14 rounded-full border-2 border-white/20">
+                    <div>
+                        <h3 class="font-black text-xs uppercase mb-1">Nexus System</h3>
+                        <p id="ai-msg" class="text-[11px] leading-snug opacity-90">"Aguardando diretrizes. Clique abaixo para gerar sua agenda personalizada."</p>
                     </div>
-                    <div class="mt-2 flex justify-center">
-                        <span class="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
-                    </div>
                 </div>
-                
-                <div class="flex-1">
-                    <h3 class="font-black text-xs italic uppercase tracking-widest mb-1 text-cyan-300">Nexus Intelligence</h3>
-                    <p id="ai-resposta" class="text-[11px] leading-relaxed font-medium bg-black/30 p-3 rounded-2xl border border-white/10 italic">
-                        "Diretrizes carregadas. Estou pronto para otimizar sua biologia. Qual o comando?"
-                    </p>
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <button onclick="gerarAgenda()" class="bg-white text-slate-900 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg">Gerar Agenda</button>
+                    <button onclick="adicionarAgua()" class="bg-cyan-900/50 text-white py-3 rounded-xl font-black text-[10px] uppercase border border-cyan-400/30">+ Água</button>
                 </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3 mt-5 relative z-10">
-                <button onclick="gerarPlano('treino')" class="bg-cyan-500 text-slate-900 py-3 rounded-2xl font-black text-[10px] uppercase shadow-xl hover:bg-cyan-400 active:scale-95 transition">Gerar Treino</button>
-                <button onclick="gerarPlano('dieta')" class="bg-black/30 text-cyan-400 py-3 rounded-2xl font-black text-[10px] uppercase border border-cyan-500/50 backdrop-blur-md hover:bg-black/40 active:scale-95 transition">Gerar Dieta</button>
-            </div>
-        </section>
+            </section>
+        </div>
 
-        <section class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100">
-            <div class="flex justify-between mb-4 items-center">
-                <h2 class="font-black text-xl italic uppercase tracking-tighter text-blue-900">Status Bio</h2>
-                <span id="porcentagem-texto" class="text-xs font-black text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full">0%</span>
+        <div id="treinos" class="tab-content space-y-4">
+            <h2 class="text-xl font-black uppercase italic tracking-tighter">Cronograma Gerado</h2>
+            <div id="agenda-container" class="space-y-4">
+                <p class="text-slate-500 text-center py-10 italic">Nenhuma agenda ativa. Use o botão "Gerar Agenda" na aba Início.</p>
             </div>
-            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-5 overflow-hidden p-1">
-                <div id="barra-progresso" class="bg-gradient-to-r from-blue-600 to-cyan-400 h-full rounded-full progress-transition" style="width: 0%"></div>
-            </div>
-            <div class="grid grid-cols-3 gap-2 mt-8">
-                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl text-center border border-slate-100 dark:border-slate-700">
-                    <span id="macro-prot" class="block text-lg font-black text-blue-600">0g</span>
-                    <span class="text-[8px] uppercase font-bold text-slate-400 tracking-widest">Prot</span>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl text-center border border-slate-100 dark:border-slate-700">
-                    <span id="macro-carb" class="block text-lg font-black text-cyan-600">0g</span>
-                    <span class="text-[8px] uppercase font-bold text-slate-400 tracking-widest">Carb</span>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl text-center border border-slate-100 dark:border-slate-700">
-                    <span id="macro-gord" class="block text-lg font-black text-indigo-600">0g</span>
-                    <span class="text-[8px] uppercase font-bold text-slate-400 tracking-widest">Gord</span>
-                </div>
-            </div>
-        </section>
+        </div>
 
-        <section class="space-y-4">
-            <h2 class="text-lg font-black uppercase tracking-tighter flex items-center gap-2">⚡ Protocolos de Campo</h2>
-            <div id="lista-treinos" class="space-y-3"></div>
-        </section>
-
-        <section class="grid grid-cols-2 gap-4">
-            <div class="bg-blue-700 p-5 rounded-[2.5rem] text-white shadow-lg text-center">
-                <h3 class="font-black text-[10px] uppercase mb-2 tracking-widest">H2O Core</h3>
-                <div id="container-agua" class="text-xl h-8 mb-2"></div>
-                <button onclick="adicionarAgua()" class="bg-white/20 w-full py-2 rounded-xl text-lg hover:bg-white/30 transition">+</button>
-            </div>
-            <div class="bg-slate-900 p-5 rounded-[2.5rem] text-white shadow-lg text-center border border-cyan-900/50">
-                <h3 class="font-black text-[10px] uppercase mb-2 tracking-widest">Recovery</h3>
-                <span id="timer-display" class="block text-2xl font-mono font-black mb-2 text-cyan-400">00:45</span>
-                <button onclick="toggleTimer()" id="btn-timer" class="bg-cyan-600 w-full py-2 rounded-xl text-xs font-black uppercase tracking-widest">Play</button>
-            </div>
-        </section>
-
-        <button onclick="compartilharNoZap()" class="w-full bg-cyan-500 text-slate-900 py-6 rounded-[2.5rem] font-black shadow-2xl uppercase tracking-[0.2em] text-xs hover:scale-[1.02] active:scale-95 transition-all">
-            Exportar Protocolo Nexus
-        </button>
+        <div id="stats" class="tab-content space-y-4">
+            <section class="bg-slate-800 p-6 rounded-[2rem]">
+                <h2 class="font-black text-xs uppercase mb-4 text-slate-400 tracking-widest">Peso e Histórico</h2>
+                <div class="flex gap-2 mb-4">
+                    <input type="number" id="in-peso" class="flex-1 bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none" placeholder="kg">
+                    <button onclick="regPeso()" class="bg-cyan-500 text-slate-900 px-6 rounded-xl font-black">OK</button>
+                </div>
+                <div id="hist-peso" class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"></div>
+            </section>
+        </div>
 
     </main>
 
+    <footer class="fixed bottom-6 left-0 w-full px-6">
+        <button onclick="compartilhar()" class="w-full bg-cyan-500 text-slate-900 py-4 rounded-2xl font-black uppercase tracking-[0.2em] shadow-2xl active:scale-95 transition">Exportar Report Nexus</button>
+    </footer>
+
     <script>
-        let db = JSON.parse(localStorage.getItem('Nexus_AI_Final')) || {
-            kcal: 0, prot: 0, carb: 0, gord: 0, objetivo: "",
-            agua: 0, xp: 0, histPeso: [], dark: false, metaKcal: 2000
+        let db = JSON.parse(localStorage.getItem('Nexus_5_Data')) || {
+            xp: 0, kcal: 0, prot: 0, carb: 0, gord: 0, agua: 0, hist: [], metaKcal: 2000
         };
 
-        const treinosLib = [
-            {n: 'Nexus HIIT', k: 60, x: 25, i: '⚡'},
-            {n: 'Neural Strength', k: 90, x: 40, i: '🧠'},
-            {n: 'Core Force', k: 80, x: 30, i: '🛡️'},
-            {n: 'Zen Protocol', k: 30, x: 20, i: '💎'}
-        ];
+        function salvar() { localStorage.setItem('Nexus_5_Data', JSON.stringify(db)); }
 
-        let timerInterval, timeLeft = 45, isTimerRunning = false;
+        function openTab(evt, tabName) {
+            let content = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < content.length; i++) content[i].classList.remove("active");
+            let links = document.getElementsByClassName("tab-link");
+            for (let i = 0; i < links.length; i++) links[i].classList.remove("active-tab");
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active-tab");
+        }
 
-        function salvar() { localStorage.setItem('Nexus_AI_Final', JSON.stringify(db)); }
-        function aplicarTema() { document.getElementById('body').classList.toggle('dark', db.dark); }
-        function toggleDarkMode() { db.dark = !db.dark; aplicarTema(); salvar(); }
-        function salvarObjetivo() { db.objetivo = document.getElementById('mural-objetivo').value; salvar(); }
+        function gerarAgenda() {
+            const container = document.getElementById('agenda-container');
+            const dias = ['Hoje (A)', 'Amanhã (B)', 'Depois (C)'];
+            const treinos = [
+                {t: 'Peito e Tríceps', e: ['Supino: 3x12', 'Flexão: 3x Max', 'Tríceps Banco: 3x15']},
+                {t: 'Costas e Bíceps', e: ['Puxada: 3x12', 'Remada: 3x12', 'Rosca Direta: 3x10']},
+                {t: 'Pernas e ABS', e: ['Agachamento: 4x12', 'Passada: 3x10', 'Prancha: 3x 1min']}
+            ];
 
-        function gerarPlano(tipo) {
-            const resp = document.getElementById('ai-resposta');
-            resp.innerText = "Sincronizando com o Core...";
-            setTimeout(() => {
-                if(tipo === 'treino') {
-                    const t = treinosLib[Math.floor(Math.random()*treinosLib.length)];
-                    resp.innerText = `NEXUS: Protocolo ativado: ${t.n}. Conclua para ganhar ${t.x} XP de evolução.`;
-                } else {
-                    resp.innerText = `NEXUS: Nutrição calibrada para seu foco em "${db.objetivo || 'performance'}". Beba mais água para otimizar.`;
-                }
-                db.xp += 10; atualizarUI(); salvar();
-            }, 800);
+            container.innerHTML = dias.map((dia, i) => `
+                <div class="bg-slate-800 p-5 rounded-2xl border-l-4 border-cyan-500 shadow-lg">
+                    <h3 class="font-black text-cyan-400 text-sm uppercase mb-3">${dia} - ${treinos[i].t}</h3>
+                    <ul class="space-y-2">
+                        ${treinos[i].e.map(ex => `<li class="text-[11px] text-slate-300 flex items-center gap-2"><span class="w-1.5 h-1.5 bg-slate-600 rounded-full"></span> ${ex}</li>`).join('')}
+                    </ul>
+                    <button onclick="concluirTreino()" class="mt-4 w-full py-2 bg-slate-700 hover:bg-cyan-900/40 rounded-lg text-[10px] font-bold uppercase transition">Concluir Missão</button>
+                </div>
+            `).join('');
+
+            document.getElementById('ai-msg').innerText = "Agenda de 72h sincronizada. Foque na execução dos movimentos.";
+            db.xp += 20; atualizarUI();
         }
 
         function atualizarUI() {
-            document.getElementById('macro-prot').innerText = db.prot + 'g';
-            document.getElementById('macro-carb').innerText = db.carb + 'g';
-            document.getElementById('macro-gord').innerText = db.gord + 'g';
-            document.getElementById('mural-objetivo').value = db.objetivo;
+            document.getElementById('m-prot').innerText = db.prot + 'g';
+            document.getElementById('m-carb').innerText = db.carb + 'g';
+            document.getElementById('m-gord').innerText = db.gord + 'g';
             let perc = Math.min(Math.round((db.kcal / db.metaKcal) * 100), 100);
             document.getElementById('barra-progresso').style.width = perc + "%";
-            document.getElementById('porcentagem-texto').innerText = perc + "%";
-            document.getElementById('xp-texto').innerText = `Core Level ${Math.floor(db.xp/100)+1} • ${db.xp} XP`;
+            document.getElementById('perc-texto').innerText = perc + "%";
+            document.getElementById('xp-texto').innerText = `LVL ${Math.floor(db.xp/100)+1} • ${db.xp} XP`;
+            
+            document.getElementById('hist-peso').innerHTML = db.hist.map(p => `
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 min-w-[70px] text-center">
+                    <span class="text-[8px] block text-slate-500 uppercase">${p.data}</span>
+                    <span class="font-black text-xs text-cyan-400">${p.valor}kg</span>
+                </div>
+            `).reverse().join('');
         }
 
-        function toggleTimer() {
-            const btn = document.getElementById('btn-timer');
-            if(isTimerRunning) {
-                clearInterval(timerInterval); timeLeft = 45; isTimerRunning = false;
-                document.getElementById('timer-display').innerText = "00:45";
-                btn.innerText = "Play"; btn.classList.replace('bg-red-500', 'bg-cyan-600');
-            } else {
-                isTimerRunning = true; btn.innerText = "Stop"; btn.classList.replace('bg-cyan-600', 'bg-red-500');
-                timerInterval = setInterval(() => {
-                    timeLeft--;
-                    document.getElementById('timer-display').innerText = `00:${timeLeft < 10 ? '0'+timeLeft : timeLeft}`;
-                    if(timeLeft <= 0) { clearInterval(timerInterval); alert("Recuperação completa."); toggleTimer(); }
-                }, 1000);
+        function concluirTreino() { db.xp += 50; db.kcal += 300; db.prot += 10; atualizarUI(); salvar(); alert("Treino registrado! +50 XP"); }
+        function adicionarAgua() { db.agua++; db.xp += 5; atualizarUI(); salvar(); }
+        function regPeso() {
+            let v = document.getElementById('in-peso').value;
+            if(v > 20) {
+                db.hist.push({valor: v, data: new Date().toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'})});
+                db.xp += 30; document.getElementById('in-peso').value = '';
+                atualizarUI(); salvar();
             }
         }
 
-        function renderTreinos() {
-            const cont = document.getElementById('lista-treinos');
-            cont.innerHTML = treinosLib.map(t => `
-                <div class="flex items-center bg-white dark:bg-slate-800 p-4 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm">
-                    <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900 rounded-2xl flex items-center justify-center text-xl mr-4 shadow-inner">${t.i}</div>
-                    <div class="flex-1">
-                        <h3 class="font-black text-xs uppercase tracking-tighter">${t.n}</h3>
-                        <p class="text-[9px] text-slate-400 font-bold">+${t.k} kcal | +${t.x} XP</p>
-                    </div>
-                    <input type="checkbox" onchange="alternarExer(this, ${t.k}, ${t.x})" class="w-7 h-7 rounded-full border-2 accent-cyan-500">
-                </div>
-            `).join('');
-        }
-
-        function alternarExer(cb, k, x) {
-            if(cb.checked) { db.kcal += k; db.xp += x; }
-            else { db.kcal -= k; db.xp -= x; }
-            atualizarUI(); salvar();
-        }
-
-        function adicionarAgua() { db.agua++; db.xp += 5; renderAgua(); atualizarUI(); salvar(); }
-        function renderAgua() { document.getElementById('container-agua').innerText = "💧".repeat(db.agua); }
-
-        function compartilharNoZap() {
-            const msg = `⚡ *NEXUS AI - REPORT* %0A🏆 Core Level: ${Math.floor(db.xp/100)+1}%0A🎯 Protocolo: ${db.objetivo}%0A📈 Performance: ${document.getElementById('porcentagem-texto').innerText}`;
+        function compartilhar() {
+            const msg = `⚡ *NEXUS AI 5.0 REPORT* %0A🏆 XP: ${db.xp}%0A📊 Meta: ${document.getElementById('perc-texto').innerText} do dia concluída!`;
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
         }
 
-        window.onload = () => { aplicarTema(); atualizarUI(); renderAgua(); renderTreinos(); };
+        window.onload = atualizarUI;
     </script>
 </body>
-    </html>
-    
+</html>
