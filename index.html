@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VittaFlow 3.1 - Evolução Pessoal</title>
+    <title>VittaFlow Ultra - Ecossistema Completo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -22,7 +22,7 @@
                 <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg">V</div>
                 <h1 class="text-2xl font-black text-green-600 tracking-tighter">VittaFlow</h1>
             </div>
-            <p id="xp-texto" class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest italic">Nível 1 • 0 XP</p>
+            <p id="xp-texto" class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Nível 1 • 0 XP</p>
         </div>
         <button onclick="toggleDarkMode()" class="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-lg shadow-inner">🌓</button>
     </header>
@@ -30,15 +30,15 @@
     <main class="p-4 max-w-md mx-auto space-y-6">
         
         <section class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-[2rem] text-white shadow-2xl">
-            <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-green-400 mb-2">Meu Foco do Mês</h3>
+            <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-green-400 mb-2">Foco Estratégico</h3>
             <textarea id="mural-objetivo" oninput="salvarObjetivo()" 
                 class="bg-transparent w-full text-lg font-medium outline-none resize-none placeholder:text-slate-600" 
-                placeholder="Ex: Correr 5km ou perder 2kg..."></textarea>
+                placeholder="Qual sua meta hoje?"></textarea>
         </section>
 
         <section class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-100">
             <div class="flex justify-between mb-4 items-center">
-                <h2 class="font-black text-xl italic uppercase tracking-tighter">Status Diário</h2>
+                <h2 class="font-black text-xl italic uppercase tracking-tighter text-slate-700 dark:text-slate-200">Energia</h2>
                 <span id="porcentagem-texto" class="text-xs font-black text-green-600 bg-green-100 dark:bg-green-900/40 px-3 py-1 rounded-full">0%</span>
             </div>
             
@@ -72,8 +72,35 @@
             </button>
         </section>
 
+        <section class="bg-blue-600 p-6 rounded-[2.5rem] text-white shadow-lg relative overflow-hidden">
+            <div class="relative z-10">
+                <h3 class="font-black text-xl italic uppercase">Água</h3>
+                <div id="container-agua" class="mt-4 flex flex-wrap gap-2 min-h-[40px] text-2xl"></div>
+            </div>
+            <button onclick="adicionarAgua()" class="absolute right-6 top-1/2 -translate-y-1/2 bg-white text-blue-600 w-16 h-16 rounded-[1.5rem] font-black shadow-2xl flex items-center justify-center text-3xl active:scale-110 transition-all">+</button>
+        </section>
+
+        <section>
+            <h2 class="text-lg font-black mb-3 uppercase tracking-tighter">Missões de Hoje</h2>
+            <div class="space-y-3">
+                <div class="flex items-center bg-white p-4 rounded-3xl shadow-sm border border-transparent">
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center text-2xl mr-4">🏃</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-sm">Polichinelos</h3>
+                        <p class="text-[10px] text-slate-500">30 seg • +50 kcal</p>
+                    </div>
+                    <input type="checkbox" id="exe-1" onchange="alternarExercicio(this, 'exe-1', 50, 20)" class="w-6 h-6 rounded-full text-green-600">
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-lg font-black mb-3 uppercase tracking-tighter">Cozinha VittaFlow</h2>
+            <div id="lista-receitas" class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide"></div>
+        </section>
+
         <section class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100">
-            <h2 class="font-black text-sm uppercase mb-4 tracking-widest">⚖️ Balança</h2>
+            <h2 class="font-black text-sm uppercase mb-4 tracking-widest">⚖️ Evolução</h2>
             <div class="flex gap-2">
                 <input type="number" step="0.1" id="input-peso" class="flex-1 p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl outline-none" placeholder="kg">
                 <button onclick="registrarPeso()" class="bg-green-500 text-white px-6 rounded-2xl font-black active:scale-95 transition">OK</button>
@@ -81,33 +108,36 @@
             <div id="historico-peso" class="mt-4 flex gap-3 overflow-x-auto py-2 scrollbar-hide"></div>
         </section>
 
-        <section class="bg-blue-600 p-6 rounded-[2.5rem] text-white shadow-lg relative overflow-hidden">
-            <div class="relative z-10">
-                <h3 class="font-black text-xl italic uppercase">Hidratação</h3>
-                <div id="container-agua" class="mt-4 flex flex-wrap gap-2 min-h-[40px] text-2xl"></div>
+        <section class="bg-slate-200 dark:bg-slate-800 p-5 rounded-3xl">
+            <h2 class="font-bold text-xs mb-3 uppercase opacity-50">Sua Meta Diária (Kcal)</h2>
+            <div class="flex gap-2">
+                <input type="number" id="input-meta" class="flex-1 p-2 bg-white dark:bg-slate-700 rounded-xl outline-none" placeholder="2000">
+                <button onclick="salvarNovaMeta()" class="bg-slate-900 text-white px-4 rounded-xl text-xs font-bold">Salvar</button>
             </div>
-            <button onclick="adicionarAgua()" class="absolute right-6 top-1/2 -translate-y-1/2 bg-white text-blue-600 w-16 h-16 rounded-[1.5rem] font-black shadow-2xl flex items-center justify-center text-3xl active:scale-110 transition-all">+</button>
         </section>
 
         <button onclick="compartilharNoZap()" class="w-full bg-[#25D366] text-white py-6 rounded-[2rem] font-black shadow-xl flex items-center justify-center gap-3 uppercase tracking-tighter active:scale-95 transition-all">
-            🚀 Compartilhar Evolução
+            🚀 Compartilhar Progresso
         </button>
+
+        <button onclick="resetarDia()" class="w-full text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-4">Reiniciar Sistema</button>
 
     </main>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('vittaFlow3_1')) || {
+        // BASE DE DADOS UNIFICADA
+        let db = JSON.parse(localStorage.getItem('vittaFlowUltra')) || {
             kcal: 0, prot: 0, carb: 0, gord: 0, objetivo: "",
-            agua: 0, xp: 0, histPeso: [], dark: false, metaKcal: 2000
+            agua: 0, xp: 0, histPeso: [], dark: false, metaKcal: 2000,
+            concluidos: []
         };
 
         let timerInterval, timeLeft = 45, isTimerRunning = false;
 
-        function salvar() { localStorage.setItem('vittaFlow3_1', JSON.stringify(db)); }
+        function salvar() { localStorage.setItem('vittaFlowUltra', JSON.stringify(db)); }
 
         function toggleDarkMode() { db.dark = !db.dark; aplicarTema(); salvar(); }
         function aplicarTema() { document.getElementById('body').classList.toggle('dark', db.dark); }
-
         function salvarObjetivo() { db.objetivo = document.getElementById('mural-objetivo').value; salvar(); }
 
         function toggleTimer() {
@@ -127,7 +157,7 @@
                     display.innerText = `00:${timeLeft < 10 ? '0'+timeLeft : timeLeft}`;
                     if (timeLeft <= 0) {
                         clearInterval(timerInterval);
-                        alert("Tempo de descanso acabou!");
+                        alert("Descanso finalizado!");
                         toggleTimer();
                     }
                 }, 1000);
@@ -139,6 +169,7 @@
             document.getElementById('macro-carb').innerText = db.carb + 'g';
             document.getElementById('macro-gord').innerText = db.gord + 'g';
             document.getElementById('mural-objetivo').value = db.objetivo;
+            document.getElementById('input-meta').value = db.metaKcal;
             
             let perc = Math.min(Math.round((db.kcal / db.metaKcal) * 100), 100);
             document.getElementById('barra-progresso').style.width = perc + "%";
@@ -146,7 +177,7 @@
             document.getElementById('xp-texto').innerText = `Nível ${Math.floor(db.xp/100)+1} • ${db.xp} XP`;
 
             document.getElementById('historico-peso').innerHTML = db.histPeso.map(p => `
-                <div class="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl text-center min-w-[85px]">
+                <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl text-center min-w-[85px] border border-slate-100 dark:border-slate-700">
                     <span class="text-[9px] block text-slate-400 font-bold uppercase">${p.data}</span>
                     <span class="font-black text-sm">${p.valor}kg</span>
                 </div>
@@ -165,12 +196,47 @@
             }
         }
 
+        function alternarExercicio(cb, id, cal, xp) {
+            if(cb.checked) { db.kcal += cal; db.xp += xp; db.concluidos.push(id); }
+            else { db.kcal -= cal; db.xp -= xp; db.concluidos = db.concluidos.filter(i => i !== id); }
+            atualizarUI(); salvar();
+        }
+
+        function addComida(p, c, g, cal) {
+            db.prot += p; db.carb += c; db.gord += g; db.kcal += cal; db.xp += 15;
+            atualizarUI(); salvar();
+            alert("Refeição adicionada!");
+        }
+
+        function salvarNovaMeta() {
+            db.metaKcal = document.getElementById('input-meta').value;
+            salvar(); atualizarUI(); alert("Meta atualizada!");
+        }
+
         function compartilharNoZap() {
-            const msg = `🚀 *VITTAFLOW 3.1* %0A🏆 XP: ${db.xp}%0A🎯 Foco: ${db.objetivo}%0A💧 Água: ${db.agua} copos%0A📊 Meta: ${document.getElementById('porcentagem-texto').innerText}`;
+            const msg = `🚀 *VITTAFLOW ULTRA* %0A🏆 XP: ${db.xp}%0A🎯 Meta: ${db.objetivo}%0A💧 Água: ${db.agua} copos%0A📊 Energia: ${document.getElementById('porcentagem-texto').innerText}`;
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
         }
 
-        window.onload = () => { aplicarTema(); atualizarUI(); renderAgua(); };
+        function resetarDia() { if(confirm("Zerar progresso de hoje?")) { localStorage.clear(); location.reload(); } }
+
+        window.onload = () => { 
+            aplicarTema(); atualizarUI(); renderAgua();
+            const recCont = document.getElementById('lista-receitas');
+            const receitas = [
+                {n: "Omelete", p:20, c:2, g:15, cal:250, i: "🍳"},
+                {n: "Shake", p:25, c:30, g:5, cal:300, i: "🥤"},
+                {n: "Frango", p:30, c:40, g:8, cal:420, i: "🍗"}
+            ];
+            receitas.forEach(r => {
+                recCont.innerHTML += `
+                <div onclick="addComida(${r.p},${r.c},${r.g},${r.cal})" class="min-w-[140px] bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm text-center active:scale-95 transition cursor-pointer">
+                    <span class="text-3xl">${r.i}</span>
+                    <h4 class="font-bold text-xs mt-2">${r.n}</h4>
+                    <p class="text-[10px] text-green-500 font-black">+${r.cal} kcal</p>
+                </div>`;
+            });
+        };
     </script>
 </body>
 </html>
