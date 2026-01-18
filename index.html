@@ -3,206 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXUS - THE SYSTEM v26</title>
+    <title>NEXUS - THE SYSTEM v27</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --system-blue: #00f2ff; --system-purple: #7000ff; --bg-dark: #020617; --rarity-gold: #fbbf24; }
+        :root { --system-blue: #00f2ff; --system-red: #ff003c; --bg-dark: #020617; }
         body { background: var(--bg-dark); color: white; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
         .font-system { font-family: 'Orbitron', sans-serif; }
-        
-        .hud-border { border: 1px solid rgba(0, 242, 255, 0.3); box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.1); }
-        .glass { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px); }
-        
-        .item-slot { width: 100%; aspect-ratio: 1/1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
-        .item-recommended { border-color: var(--system-blue); box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); animation: pulse-border 2s infinite; }
-        
-        @keyframes pulse-border { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
+        .hud-border { border: 1px solid rgba(0, 242, 255, 0.2); box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.05); }
+        .glass { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeInUp 0.4s ease-out; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Estilo Solo Leveling */
-        .potion-blue { color: #00f2ff; filter: drop-shadow(0 0 5px #00f2ff); }
-        .potion-red { color: #ff4d4d; filter: drop-shadow(0 0 5px #ff4d4d); }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        .penalty-mode { border-color: var(--system-red) !important; color: var(--system-red) !important; animation: shake 0.5s infinite; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body class="pb-32">
 
+    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-[70000] bg-cyan-500 text-black px-6 py-2 rounded-full font-black text-[10px] uppercase hidden shadow-[0_0_20px_rgba(6,182,212,0.5)]"></div>
+
     <div id="boot-screen" class="fixed inset-0 bg-black z-[60000] flex flex-col items-center justify-center text-cyan-500">
-        <div class="font-system text-[10px] tracking-[0.5em] mb-4">SYSTEM CALIBRATION</div>
+        <div class="font-system text-[10px] tracking-[0.5em] mb-4 animate-pulse">SISTEMA MONARCA ATIVADO</div>
         <div id="boot-log" class="text-[10px] font-mono opacity-50"></div>
     </div>
 
     <div id="main-app" class="hidden">
-        <header class="p-6 sticky top-0 z-50 glass border-b border-cyan-500/20 flex justify-between items-end">
-            <div>
-                <p class="text-[10px] font-system text-cyan-500 tracking-tighter italic">STATUS: ONLINE</p>
-                <div class="flex items-center gap-2">
-                    <span class="text-3xl font-black font-system">LVL. <span id="display-lvl">1</span></span>
-                    <div id="rank-badge" class="px-2 py-0.5 bg-cyan-500 text-black text-[10px] font-bold rounded">RANK E</div>
+        <header class="p-6 sticky top-0 z-50 glass border-b border-cyan-500/20">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-3xl font-black font-system text-white">LVL. <span id="display-lvl">1</span></span>
+                        <div class="px-2 py-0.5 bg-cyan-500 text-black text-[9px] font-bold rounded italic">RANK E</div>
+                    </div>
+                    <p class="text-[10px] font-system text-cyan-500 mt-1 uppercase tracking-widest">Sovereign Hunter</p>
                 </div>
-            </div>
-            <div class="text-right">
-                <p id="xp-text" class="text-[8px] font-system text-slate-500">XP TO LEVEL UP</p>
-                <div class="w-24 h-1.5 bg-slate-800 rounded-full mt-1 overflow-hidden">
-                    <div id="xp-bar" class="h-full bg-cyan-400 shadow-[0_0_10px_#00f2ff] transition-all duration-1000"></div>
+                <div class="text-right">
+                    <p class="text-[11px] font-bold text-yellow-500 font-system"><span id="display-gold">0</span> G</p>
+                    <div class="w-24 h-1 bg-slate-800 rounded-full mt-2 overflow-hidden">
+                        <div id="xp-bar" class="h-full bg-cyan-400 transition-all duration-500 w-0"></div>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <main class="p-6">
+        <main class="p-6 space-y-6">
             
             <section id="status" class="tab-content active space-y-6">
-                <div class="hud-border p-6 rounded-tl-[2rem] rounded-br-[2rem] glass">
-                    <h2 class="font-system text-xs text-cyan-500 mb-4 tracking-widest">[ ATRIBUTOS ]</h2>
-                    <div class="grid grid-cols-3 gap-4 text-center">
-                        <div class="p-2 bg-white/5 rounded-xl"><p class="text-[8px] text-slate-500 uppercase">FOR</p><p id="stat-str" class="text-xl font-bold">10</p></div>
-                        <div class="p-2 bg-white/5 rounded-xl"><p class="text-[8px] text-slate-500 uppercase">AGI</p><p id="stat-agi" class="text-xl font-bold">10</p></div>
-                        <div class="p-2 bg-white/5 rounded-xl"><p class="text-[8px] text-slate-500 uppercase">VIT</p><p id="stat-vit" class="text-xl font-bold">10</p></div>
-                    </div>
+                <div class="hud-border p-5 rounded-2xl glass grid grid-cols-3 gap-4 text-center">
+                    <div><p class="text-[8px] text-slate-500 uppercase">FOR</p><p id="stat-str" class="text-xl font-bold">10</p></div>
+                    <div><p class="text-[8px] text-slate-500 uppercase">AGI</p><p id="stat-agi" class="text-xl font-bold">10</p></div>
+                    <div><p class="text-[8px] text-slate-500 uppercase">VIT</p><p id="stat-vit" class="text-xl font-bold">10</p></div>
                 </div>
 
-                <div class="hud-border p-6 rounded-tr-[2rem] rounded-bl-[2rem] border-purple-500/30">
-                    <h2 class="font-system text-xs text-purple-400 tracking-widest mb-4">[ DAILY QUESTS ]</h2>
-                    <div id="daily-list" class="space-y-3">
-                        <div onclick="completeQuest(this, 'str', 100)" class="p-4 glass rounded-xl flex justify-between border-l-2 border-cyan-500/30">
-                            <span class="text-xs font-bold">CONCLUIR TREINO DO DIA</span>
-                            <span class="text-cyan-500 text-[10px]">+FOR</span>
+                <div id="quest-card" class="hud-border p-6 rounded-3xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="font-system text-[10px] text-cyan-500 tracking-widest">QUEST DIÁRIA: O CAMINHO DO FORTE</h2>
+                        <span id="timer" class="text-[10px] font-mono text-cyan-400">23:59:59</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-xs bg-white/5 p-4 rounded-xl">
+                            <span>TREINO COMPLETO</span>
+                            <button onclick="finishQuest()" class="bg-cyan-500 text-black px-4 py-1 rounded-lg font-black text-[9px]">CONCLUIR</button>
                         </div>
                     </div>
+                    <p class="text-[8px] text-slate-500 uppercase italic">! AVISO: FALHA RESULTARÁ EM PENALIDADE DE ATRIBUTOS</p>
+                </div>
+
+                <div class="glass p-5 rounded-2xl border border-white/5">
+                    <p class="text-[9px] text-slate-500 uppercase mb-3">Definir Foco de Classe</p>
+                    <select onchange="updateMeta(this.value)" id="meta-select" class="w-full bg-transparent border-b border-cyan-500/30 py-2 text-xs outline-none">
+                        <option value="Bulking" class="bg-black text-white">BULKING (Foco em Força)</option>
+                        <option value="Cutting" class="bg-black text-white">CUTTING (Foco em Agilidade)</option>
+                    </select>
                 </div>
             </section>
 
-            <section id="inventario" class="tab-content space-y-6">
-                <div class="flex justify-between items-center">
-                    <h2 class="font-system text-xs text-cyan-500 tracking-widest">[ INVENTÁRIO DE HUNTER ]</h2>
-                    <span id="meta-info" class="text-[9px] bg-white/10 px-3 py-1 rounded-full text-slate-400 uppercase tracking-widest">Meta: Bulking</span>
-                </div>
-
-                <div class="grid grid-cols-3 gap-4" id="inventory-grid">
+            <section id="market" class="tab-content space-y-4">
+                <h2 class="font-system text-[10px] text-yellow-500 tracking-widest">[ MERCADO DO SISTEMA ]</h2>
+                <div id="market-grid" class="grid grid-cols-1 gap-4">
                     </div>
-
-                <div id="item-detail" class="hud-border p-6 rounded-3xl glass mt-8 hidden">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div id="detail-icon" class="text-4xl"></div>
-                        <div>
-                            <h3 id="detail-name" class="font-bold text-lg uppercase tracking-tighter">Item Name</h3>
-                            <p id="detail-rarity" class="text-[8px] font-system text-yellow-500">RARIDADE: ÉPICO</p>
-                        </div>
-                    </div>
-                    <p id="detail-desc" class="text-xs text-slate-400 leading-relaxed mb-6"></p>
-                    <button onclick="consumeItem()" class="w-full bg-cyan-600 py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-cyan-600/20">Consumir e Aplicar Buff</button>
-                </div>
-            </section>
-
-            <section id="quests" class="tab-content space-y-4">
-                <h2 class="font-system text-xs text-cyan-500 tracking-widest">[ QUEST LOG ]</h2>
-                <div class="space-y-4">
-                    <div class="hud-border p-5 rounded-2xl glass flex justify-between items-center">
-                        <div>
-                            <h3 class="font-bold text-sm">Supino Alpha</h3>
-                            <p class="text-[8px] text-slate-500 uppercase">Foco em Hipertrofia</p>
-                        </div>
-                        <button onclick="gainXP(200, 'str')" class="bg-cyan-500 text-black px-4 py-2 rounded-lg font-black text-[10px]">CONCLUIR</button>
-                    </div>
-                </div>
             </section>
 
         </main>
 
         <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] h-16 glass hud-border rounded-full flex items-center justify-around z-50">
-            <button onclick="nav('status')" class="nav-btn text-cyan-500 flex flex-col items-center"><span class="text-xl">👤</span><span class="text-[7px] font-system">STATUS</span></button>
-            <button onclick="nav('inventario')" class="nav-btn text-slate-500 flex flex-col items-center"><span class="text-xl">🎒</span><span class="text-[7px] font-system">INV.</span></button>
-            <button onclick="toggleChat()" class="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center shadow-[0_0_15px_#00f2ff]"><span class="text-xl">🧠</span></button>
-            <button onclick="nav('quests')" class="nav-btn text-slate-500 flex flex-col items-center"><span class="text-xl">⚔️</span><span class="text-[7px] font-system">QUEST</span></button>
+            <button onclick="nav('status')" class="text-cyan-500 flex flex-col items-center"><span class="text-xl">👤</span><span class="text-[7px] font-system">STATUS</span></button>
+            <button onclick="nav('market')" class="text-slate-500 flex flex-col items-center"><span class="text-xl">⚖️</span><span class="text-[7px] font-system">SHOP</span></button>
+            <button onclick="nav('status')" class="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center shadow-[0_0_15px_#00f2ff]"><span class="text-xl text-black">⚔️</span></button>
         </nav>
-
-        <div id="chat-window" class="fixed inset-x-4 bottom-24 h-[50vh] glass hud-border hidden flex-col z-[100] rounded-3xl overflow-hidden">
-            <div class="p-4 border-b border-cyan-500/20 bg-cyan-500/5 font-system text-[9px] text-cyan-400">INTERFACE DO SISTEMA</div>
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-6 font-mono text-[10px] space-y-4"></div>
-            <div class="p-4 bg-black/40"><input id="chat-input" placeholder="Perguntar ao Sistema..." class="w-full bg-transparent outline-none text-xs border-b border-cyan-500/20 pb-2"></div>
-        </div>
     </div>
 
     <script>
         let db;
-        const ITEMS = [
-            { id: 'creatina', name: 'Elixir de Força (Creatina)', icon: '🧪', rarity: 'ÉPICO', buff: 'STR', desc: 'Aumenta a reserva de ATP. Essencial para caçadores que focam em explosão muscular.', meta: 'Bulking' },
-            { id: 'whey', name: 'Néctar de Yggdrasil (Whey)', icon: '🥤', rarity: 'RARO', buff: 'VIT', desc: 'Recuperação acelerada de tecidos rompidos em batalha. +Vitalidade.', meta: 'Bulking' },
-            { id: 'pre', name: 'Sangue de Berserker (Pré-Treino)', icon: '🔥', rarity: 'LENDÁRIO', buff: 'AGI', desc: 'Ignora a fadiga mental por 60 minutos. Aumenta o foco em 300%.', meta: 'Cutting' },
-            { id: 'termogenico', name: 'Essência de Fogo (Termo)', icon: '💊', rarity: 'COMUM', buff: 'AGI', desc: 'Acelera o metabolismo basal. Ideal para queima de energia acumulada.', meta: 'Cutting' }
-        ];
-
-        let selectedItem = null;
+        const MARKET_ITEMS = {
+            'Bulking': [
+                { id: 1, name: 'Creatina Épica', price: 500, icon: '🧪', buff: 'str', desc: '+2 Força permanentemente.' },
+                { id: 2, name: 'Whey Lendário', price: 300, icon: '🥤', buff: 'vit', desc: '+2 Vitalidade permanentemente.' }
+            ],
+            'Cutting': [
+                { id: 3, name: 'Termogênico de Fogo', price: 400, icon: '🔥', buff: 'agi', desc: '+2 Agilidade permanentemente.' },
+                { id: 4, name: 'Chá de Ervas Raro', price: 200, icon: '🍃', buff: 'vit', desc: '+1 Vitalidade permanentemente.' }
+            ]
+        };
 
         function init() {
-            const data = localStorage.getItem('Nexus_Final_DB');
+            const data = localStorage.getItem('Nexus_Monarch_DB');
             db = data ? JSON.parse(data) : { 
                 lvl: 1, xp: 0, nextLvl: 1000, 
                 str: 10, agi: 10, vit: 10, 
-                meta: 'Bulking' 
+                gold: 100, meta: 'Bulking' 
             };
         }
 
-        function save() { localStorage.setItem('Nexus_Final_DB', JSON.stringify(db)); }
+        function save() { localStorage.setItem('Nexus_Monarch_DB', JSON.stringify(db)); }
 
-        window.addEventListener('load', () => {
+        document.addEventListener('DOMContentLoaded', () => {
             init();
             const log = document.getElementById('boot-log');
-            const lines = ["> Inicializando Nexus2026", "> Sincronizando Inventário...", "> Bem-vindo, Sovereign."];
+            const lines = ["> ACESSANDO REGISTROS...", "> ANALISANDO NÍVEL DE MANA...", "> BEM-VINDO, MONARCA."];
             let i = 0;
             const int = setInterval(() => {
                 log.innerText = lines[i]; i++;
                 if(i >= lines.length) {
                     clearInterval(int);
-                    setTimeout(() => { 
-                        document.getElementById('boot-screen').style.display = 'none';
-                        document.getElementById('main-app').classList.remove('hidden');
-                        renderInventory();
-                        updateUI();
-                    }, 800);
+                    document.getElementById('boot-screen').style.display = 'none';
+                    document.getElementById('main-app').classList.remove('hidden');
+                    renderMarket();
+                    updateUI();
                 }
-            }, 400);
+            }, 100);
+            startTimer();
         });
-
-        function renderInventory() {
-            const grid = document.getElementById('inventory-grid');
-            grid.innerHTML = '';
-            document.getElementById('meta-info').innerText = `Meta: ${db.meta}`;
-
-            ITEMS.forEach(item => {
-                const isRecommended = item.meta === db.meta;
-                const slot = document.createElement('div');
-                slot.className = `item-slot rounded-2xl flex items-center justify-center text-3xl cursor-pointer ${isRecommended ? 'item-recommended' : ''}`;
-                slot.innerHTML = item.icon;
-                slot.onclick = () => showItemDetail(item);
-                grid.appendChild(slot);
-            });
-        }
-
-        function showItemDetail(item) {
-            selectedItem = item;
-            document.getElementById('item-detail').classList.remove('hidden');
-            document.getElementById('detail-name').innerText = item.name;
-            document.getElementById('detail-icon').innerText = item.icon;
-            document.getElementById('detail-rarity').innerText = `RARIDADE: ${item.rarity}`;
-            document.getElementById('detail-desc').innerText = item.desc;
-        }
-
-        function consumeItem() {
-            if(!selectedItem) return;
-            const buff = selectedItem.buff.toLowerCase();
-            db[buff] += 1;
-            db.xp += 100;
-            save();
-            updateUI();
-            systemMsg(`[ITEM]: Você consumiu ${selectedItem.name}. Buff aplicado: +1 ${selectedItem.buff}`);
-            showToast("ITEM CONSUMIDO - XP +100");
-        }
 
         function updateUI() {
             document.getElementById('display-lvl').innerText = db.lvl;
-            document.getElementById('
+            document.getElementById('display-gold').innerText = db.gold;
+            document.getElementById('stat-str').innerText = db.str;
+            document.getElementById('stat-agi').innerText = db.agi;
+            document.getElementById('stat-vit').innerText = db.vit;
+            document.getElementById('meta-select').value = db.meta;
+            const perc = (db.xp / db.nextLvl) * 100;
+            document.getElementById('xp-bar').style.width = perc + "%";
+            
+            if(db.xp >= db.nextLvl) {
+                db.lvl++; db.xp = 0; db.nextLvl *= 1.5;
+                showToast("SISTEMA: LEVEL UP!");
+                save(); updateUI();
+            }
+        }
+
+        function renderMarket() {
+            const grid = document.getElementById('market-grid');
+            grid.innerHTML = '';
+            MARKET_ITEMS[db.meta].forEach(item => {
+                grid.innerHTML += `
+                    <div class="hud-border p-5 rounded-2xl glass flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <span class="text-3xl">${item.icon}</span>
+                            <div>
+                                <p class="text-xs font-bold uppercase">${item.name}</p>
+                                <p class="text-[8px] text-slate-500">${item.desc}</p>
+                            </div>
+                        </div>
+                        <button onclick="buyItem(${item.price}, '${item.buff}')" class="bg-yellow-500 text-black px-4 py-2 rounded-lg font-black text-[9px] uppercase">${item.price} G</button>
+                    </div>`;
+            });
+        }
+
+        function buyItem(price, buff) {
+            if(db.gold >= price) {
+                db.gold -= price;
+                db[buff] += 2;
+                showToast("ITEM ADQUIRIDO - BUFF APLICADO");
+                save(); updateUI();
+            } else {
+                showToast("OURO INSUFICIENTE!");
+            }
+        }
+
+        function finishQuest() {
+            db.gold += 250;
+            db.xp += 500;
+            showToast("QUEST CONCLUÍDA: +250G | +500XP");
+            save(); updateUI();
+        }
+
+        function updateMeta(val) {
+            db.meta = val;
+            save(); 
+            renderMarket();
+            updateUI();
+        }
+
+        function startTimer() {
+            const timerEl = document.getElementById('timer');
+            let h = 23, m = 59, s = 59;
+            setInterval(() => {
+                s--;
+                if(s < 0) { s = 59; m--; }
+                if(m < 0) { m = 59; h--; }
+                timerEl.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
                 
+                // Simulação de Penalidade se o tempo estiver acabando (ex: menos de 1h)
+                if(h < 1) document.getElementById('quest-card').classList.add('penalty-mode');
+            }, 1000);
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2500);
+        }
+
+        function nav(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('nav button').forEach(b => b.classList.replace('text-cyan-500', 'text-slate-500'));
+            event.currentTarget.classList.replace('text-slate-500', 'text-cyan-500');
+        }
+    </script>
+</body>
+</html>
