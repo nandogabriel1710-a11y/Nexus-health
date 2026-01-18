@@ -3,149 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXUS - THE SYSTEM v27</title>
+    <title>NEXUS - THE SYSTEM v28.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --system-blue: #00f2ff; --system-red: #ff003c; --bg-dark: #020617; }
+        :root { --system-blue: #00f2ff; --system-purple: #7000ff; --bg-dark: #020617; }
         body { background: var(--bg-dark); color: white; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
         .font-system { font-family: 'Orbitron', sans-serif; }
         .hud-border { border: 1px solid rgba(0, 242, 255, 0.2); box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.05); }
-        .glass { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); }
+        .glass { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        .penalty-mode { border-color: var(--system-red) !important; color: var(--system-red) !important; animation: shake 0.5s infinite; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
     </style>
 </head>
 <body class="pb-32">
 
-    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-[70000] bg-cyan-500 text-black px-6 py-2 rounded-full font-black text-[10px] uppercase hidden shadow-[0_0_20px_rgba(6,182,212,0.5)]"></div>
+    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-[70000] bg-cyan-500 text-black px-6 py-2 rounded-full font-black text-[10px] uppercase hidden shadow-[0_0_20px_rgba(6,182,212,0.4)]"></div>
 
     <div id="boot-screen" class="fixed inset-0 bg-black z-[60000] flex flex-col items-center justify-center text-cyan-500">
-        <div class="font-system text-[10px] tracking-[0.5em] mb-4 animate-pulse">SISTEMA MONARCA ATIVADO</div>
-        <div id="boot-log" class="text-[10px] font-mono opacity-50"></div>
+        <div class="font-system text-xs tracking-[0.5em] mb-4 animate-pulse">NEXUS2026 SYSTEM</div>
+        <div id="boot-log" class="text-[10px] font-mono opacity-50 h-4"></div>
     </div>
 
     <div id="main-app" class="hidden">
-        <header class="p-6 sticky top-0 z-50 glass border-b border-cyan-500/20">
-            <div class="flex justify-between items-start">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-3xl font-black font-system text-white">LVL. <span id="display-lvl">1</span></span>
-                        <div class="px-2 py-0.5 bg-cyan-500 text-black text-[9px] font-bold rounded italic">RANK E</div>
-                    </div>
-                    <p class="text-[10px] font-system text-cyan-500 mt-1 uppercase tracking-widest">Sovereign Hunter</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-[11px] font-bold text-yellow-500 font-system"><span id="display-gold">0</span> G</p>
-                    <div class="w-24 h-1 bg-slate-800 rounded-full mt-2 overflow-hidden">
-                        <div id="xp-bar" class="h-full bg-cyan-400 transition-all duration-500 w-0"></div>
+        <header class="p-6 sticky top-0 z-50 glass border-b border-cyan-500/20 flex justify-between items-center">
+            <div>
+                <h1 class="font-system text-lg font-black tracking-tighter text-white">NEXUS<span class="text-cyan-500">2026</span></h1>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold font-system text-slate-400">LVL.<span id="display-lvl">1</span></span>
+                    <div class="w-20 h-1 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="xp-bar" class="h-full bg-cyan-400 w-0 transition-all duration-500"></div>
                     </div>
                 </div>
+            </div>
+            <div class="text-right">
+                <p id="display-gold" class="text-yellow-500 font-system font-bold text-sm">0 G</p>
+                <p class="text-[8px] text-slate-500 uppercase tracking-widest">Saldo</p>
             </div>
         </header>
 
         <main class="p-6 space-y-6">
             
             <section id="status" class="tab-content active space-y-6">
-                <div class="hud-border p-5 rounded-2xl glass grid grid-cols-3 gap-4 text-center">
-                    <div><p class="text-[8px] text-slate-500 uppercase">FOR</p><p id="stat-str" class="text-xl font-bold">10</p></div>
-                    <div><p class="text-[8px] text-slate-500 uppercase">AGI</p><p id="stat-agi" class="text-xl font-bold">10</p></div>
-                    <div><p class="text-[8px] text-slate-500 uppercase">VIT</p><p id="stat-vit" class="text-xl font-bold">10</p></div>
+                <div class="hud-border p-5 rounded-2xl glass grid grid-cols-3 gap-2 text-center">
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                        <p class="text-[7px] text-slate-500 uppercase">Força</p>
+                        <p id="stat-str" class="text-xl font-bold">10</p>
+                    </div>
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                        <p class="text-[7px] text-slate-500 uppercase">Agilidade</p>
+                        <p id="stat-agi" class="text-xl font-bold">10</p>
+                    </div>
+                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                        <p class="text-[7px] text-slate-500 uppercase">Vitalidade</p>
+                        <p id="stat-vit" class="text-xl font-bold">10</p>
+                    </div>
                 </div>
 
-                <div id="quest-card" class="hud-border p-6 rounded-3xl space-y-4">
-                    <div class="flex justify-between items-center">
-                        <h2 class="font-system text-[10px] text-cyan-500 tracking-widest">QUEST DIÁRIA: O CAMINHO DO FORTE</h2>
-                        <span id="timer" class="text-[10px] font-mono text-cyan-400">23:59:59</span>
+                <div class="hud-border p-6 rounded-3xl border-purple-500/30">
+                    <h3 class="font-system text-[9px] text-purple-400 mb-4 uppercase">Quest Diária</h3>
+                    <div id="quest-item" class="flex justify-between items-center bg-purple-500/10 p-4 rounded-xl border-l-4 border-purple-500">
+                        <span id="quest-title" class="text-xs font-bold">CONCLUIR TREINO DO DIA</span>
+                        <button id="btn-quest" onclick="completeDaily()" class="bg-cyan-500 text-black px-4 py-1 rounded-lg font-black text-[9px]">CONCLUIR</button>
                     </div>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between text-xs bg-white/5 p-4 rounded-xl">
-                            <span>TREINO COMPLETO</span>
-                            <button onclick="finishQuest()" class="bg-cyan-500 text-black px-4 py-1 rounded-lg font-black text-[9px]">CONCLUIR</button>
-                        </div>
-                    </div>
-                    <p class="text-[8px] text-slate-500 uppercase italic">! AVISO: FALHA RESULTARÁ EM PENALIDADE DE ATRIBUTOS</p>
-                </div>
-
-                <div class="glass p-5 rounded-2xl border border-white/5">
-                    <p class="text-[9px] text-slate-500 uppercase mb-3">Definir Foco de Classe</p>
-                    <select onchange="updateMeta(this.value)" id="meta-select" class="w-full bg-transparent border-b border-cyan-500/30 py-2 text-xs outline-none">
-                        <option value="Bulking" class="bg-black text-white">BULKING (Foco em Força)</option>
-                        <option value="Cutting" class="bg-black text-white">CUTTING (Foco em Agilidade)</option>
-                    </select>
                 </div>
             </section>
 
             <section id="market" class="tab-content space-y-4">
-                <h2 class="font-system text-[10px] text-yellow-500 tracking-widest">[ MERCADO DO SISTEMA ]</h2>
-                <div id="market-grid" class="grid grid-cols-1 gap-4">
-                    </div>
+                <h2 class="font-system text-[10px] text-yellow-500 tracking-widest uppercase">[ Loja ]</h2>
+                <div id="market-list" class="space-y-4"></div>
             </section>
 
+            <section id="guild" class="tab-content space-y-4">
+                <h2 class="font-system text-[10px] text-cyan-500 tracking-widest uppercase">[ Guilda Nexus ]</h2>
+                <div class="space-y-3">
+                    <div class="glass p-4 rounded-xl border border-white/5 flex items-center gap-4">
+                        <div class="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center font-bold text-black text-xs">S</div>
+                        <div>
+                            <p class="text-xs font-bold">Monarca_Nexus <span class="text-[9px] text-cyan-500 ml-2">LVL 99</span></p>
+                            <p class="text-[9px] text-slate-500 italic">"O erro foi corrigido, Hunters!"</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
 
-        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] h-16 glass hud-border rounded-full flex items-center justify-around z-50">
-            <button onclick="nav('status')" class="text-cyan-500 flex flex-col items-center"><span class="text-xl">👤</span><span class="text-[7px] font-system">STATUS</span></button>
-            <button onclick="nav('market')" class="text-slate-500 flex flex-col items-center"><span class="text-xl">⚖️</span><span class="text-[7px] font-system">SHOP</span></button>
-            <button onclick="nav('status')" class="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center shadow-[0_0_15px_#00f2ff]"><span class="text-xl text-black">⚔️</span></button>
+        <div id="chat-window" class="fixed inset-x-4 bottom-24 h-[60vh] glass hud-border hidden flex-col z-[100] rounded-3xl overflow-hidden border-cyan-500/40">
+            <div class="p-4 border-b border-cyan-500/20 bg-cyan-500/10 flex justify-between items-center">
+                <span class="font-system text-[9px] text-cyan-400 tracking-widest">SISTEMA IA</span>
+                <button onclick="toggleChat()" class="text-slate-500">✕</button>
+            </div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-6 font-mono text-[11px] space-y-4"></div>
+            <div class="p-4 bg-black/40 flex gap-2">
+                <input id="chat-input" placeholder="Comando para o Sistema..." class="flex-1 bg-transparent outline-none text-xs">
+                <button onclick="askAI()" class="text-cyan-500 font-system text-[10px]">ENVIAR</button>
+            </div>
+        </div>
+
+        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] h-16 glass hud-border rounded-full flex items-center justify-around z-50">
+            <button onclick="nav('status')" class="text-cyan-500"><span class="text-xl">👤</span></button>
+            <button onclick="nav('market')" class="text-slate-500"><span class="text-xl">⚖️</span></button>
+            <button onclick="toggleChat()" class="w-14 h-14 bg-cyan-500 rounded-full -mt-10 shadow-[0_0_20px_#00f2ff] flex items-center justify-center"><span class="text-2xl">🧠</span></button>
+            <button onclick="nav('guild')" class="text-slate-500"><span class="text-xl">🛡️</span></button>
         </nav>
     </div>
 
     <script>
         let db;
-        const MARKET_ITEMS = {
-            'Bulking': [
-                { id: 1, name: 'Creatina Épica', price: 500, icon: '🧪', buff: 'str', desc: '+2 Força permanentemente.' },
-                { id: 2, name: 'Whey Lendário', price: 300, icon: '🥤', buff: 'vit', desc: '+2 Vitalidade permanentemente.' }
-            ],
-            'Cutting': [
-                { id: 3, name: 'Termogênico de Fogo', price: 400, icon: '🔥', buff: 'agi', desc: '+2 Agilidade permanentemente.' },
-                { id: 4, name: 'Chá de Ervas Raro', price: 200, icon: '🍃', buff: 'vit', desc: '+1 Vitalidade permanentemente.' }
-            ]
-        };
+        const SHOP_ITEMS = [
+            { id: 1, name: 'Creatina Monarca', price: 400, icon: '🧪', buff: 'str', desc: '+2 Força' },
+            { id: 2, name: 'Whey de Yggdrasil', price: 350, icon: '🥤', buff: 'vit', desc: '+2 Vitalidade' }
+        ];
 
         function init() {
-            const data = localStorage.getItem('Nexus_Monarch_DB');
+            const data = localStorage.getItem('Nexus_Final_v28');
             db = data ? JSON.parse(data) : { 
                 lvl: 1, xp: 0, nextLvl: 1000, 
-                str: 10, agi: 10, vit: 10, 
-                gold: 100, meta: 'Bulking' 
+                str: 10, agi: 10, vit: 10, gold: 100,
+                lastQuestDate: "" // TRAVA AQUI
             };
         }
 
-        function save() { localStorage.setItem('Nexus_Monarch_DB', JSON.stringify(db)); }
+        function save() { localStorage.setItem('Nexus_Final_v28', JSON.stringify(db)); }
 
         document.addEventListener('DOMContentLoaded', () => {
             init();
-            const log = document.getElementById('boot-log');
-            const lines = ["> ACESSANDO REGISTROS...", "> ANALISANDO NÍVEL DE MANA...", "> BEM-VINDO, MONARCA."];
-            let i = 0;
-            const int = setInterval(() => {
-                log.innerText = lines[i]; i++;
-                if(i >= lines.length) {
-                    clearInterval(int);
-                    document.getElementById('boot-screen').style.display = 'none';
-                    document.getElementById('main-app').classList.remove('hidden');
-                    renderMarket();
-                    updateUI();
-                }
-            }, 100);
-            startTimer();
+            setTimeout(() => {
+                document.getElementById('boot-screen').style.display = 'none';
+                document.getElementById('main-app').classList.remove('hidden');
+                renderShop();
+                updateUI();
+            }, 800);
         });
 
         function updateUI() {
             document.getElementById('display-lvl').innerText = db.lvl;
-            document.getElementById('display-gold').innerText = db.gold;
+            document.getElementById('display-gold').innerText = `${db.gold} G`;
             document.getElementById('stat-str').innerText = db.str;
             document.getElementById('stat-agi').innerText = db.agi;
             document.getElementById('stat-vit').innerText = db.vit;
-            document.getElementById('meta-select').value = db.meta;
+            
             const perc = (db.xp / db.nextLvl) * 100;
             document.getElementById('xp-bar').style.width = perc + "%";
-            
+
+            // LOGICA ANTI-EXPLOIT: Checar se já fez hoje
+            const today = new Date().toISOString().split('T')[0];
+            const btn = document.getElementById('btn-quest');
+            const card = document.getElementById('quest-item');
+            const title = document.getElementById('quest-title');
+
+            if(db.lastQuestDate === today) {
+                btn.disabled = true;
+                btn.innerText = "CONCLUÍDO";
+                card.classList.replace('border-purple-500', 'border-slate-500');
+                title.innerText = "MISSÃO CUMPRIDA POR HOJE";
+                title.classList.add('text-slate-500');
+            }
+
             if(db.xp >= db.nextLvl) {
                 db.lvl++; db.xp = 0; db.nextLvl *= 1.5;
                 showToast("SISTEMA: LEVEL UP!");
@@ -153,61 +169,56 @@
             }
         }
 
-        function renderMarket() {
-            const grid = document.getElementById('market-grid');
-            grid.innerHTML = '';
-            MARKET_ITEMS[db.meta].forEach(item => {
-                grid.innerHTML += `
-                    <div class="hud-border p-5 rounded-2xl glass flex justify-between items-center">
-                        <div class="flex items-center gap-4">
-                            <span class="text-3xl">${item.icon}</span>
-                            <div>
-                                <p class="text-xs font-bold uppercase">${item.name}</p>
-                                <p class="text-[8px] text-slate-500">${item.desc}</p>
-                            </div>
+        function completeDaily() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Verificação de segurança adicional no código
+            if(db.lastQuestDate === today) {
+                showToast("SISTEMA: MISSÃO JÁ REALIZADA HOJE!");
+                return;
+            }
+
+            db.gold += 250;
+            db.xp += 500;
+            db.lastQuestDate = today; // SALVA O DIA DO CLIQUE
+            
+            showToast("QUEST CONCLUÍDA: +250G | +500XP");
+            save();
+            updateUI();
+        }
+
+        function renderShop() {
+            const list = document.getElementById('market-list');
+            list.innerHTML = SHOP_ITEMS.map(item => `
+                <div class="hud-border p-4 rounded-2xl glass flex justify-between items-center border-white/5">
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl">${item.icon}</span>
+                        <div>
+                            <p class="text-xs font-bold uppercase">${item.name}</p>
+                            <p class="text-[8px] text-slate-400">${item.desc}</p>
                         </div>
-                        <button onclick="buyItem(${item.price}, '${item.buff}')" class="bg-yellow-500 text-black px-4 py-2 rounded-lg font-black text-[9px] uppercase">${item.price} G</button>
-                    </div>`;
-            });
+                    </div>
+                    <button onclick="buyItem(${item.price}, '${item.buff}')" class="bg-yellow-500 text-black px-4 py-2 rounded-lg font-black text-[9px]">${item.price}G</button>
+                </div>
+            `).join('');
         }
 
         function buyItem(price, buff) {
             if(db.gold >= price) {
-                db.gold -= price;
-                db[buff] += 2;
-                showToast("ITEM ADQUIRIDO - BUFF APLICADO");
+                db.gold -= price; db[buff] += 2;
+                showToast("SISTEMA: ITEM ADQUIRIDO");
                 save(); updateUI();
-            } else {
-                showToast("OURO INSUFICIENTE!");
-            }
+            } else { showToast("SISTEMA: OURO INSUFICIENTE"); }
         }
 
-        function finishQuest() {
-            db.gold += 250;
-            db.xp += 500;
-            showToast("QUEST CONCLUÍDA: +250G | +500XP");
-            save(); updateUI();
+        function nav(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
 
-        function updateMeta(val) {
-            db.meta = val;
-            save(); 
-            renderMarket();
-            updateUI();
-        }
-
-        function startTimer() {
-            const timerEl = document.getElementById('timer');
-            let h = 23, m = 59, s = 59;
-            setInterval(() => {
-                s--;
-                if(s < 0) { s = 59; m--; }
-                if(m < 0) { m = 59; h--; }
-                timerEl.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                
-                // Simulação de Penalidade se o tempo estiver acabando (ex: menos de 1h)
-                if(h < 1) document.getElementById('quest-card').classList.add('penalty-mode');
-            }, 1000);
+        function toggleChat() {
+            const chat = document.getElementById('chat-window');
+            chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
         }
 
         function showToast(msg) {
@@ -216,11 +227,21 @@
             setTimeout(() => t.style.display = 'none', 2500);
         }
 
-        function nav(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('nav button').forEach(b => b.classList.replace('text-cyan-500', 'text-slate-500'));
-            event.currentTarget.classList.replace('text-slate-500', 'text-cyan-500');
+        function askAI() {
+            const input = document.getElementById('chat-input');
+            if(!input.value) return;
+            const box = document.getElementById('chat-messages');
+            box.innerHTML += `<div class="text-slate-400 font-bold">[CAÇADOR]: ${input.value}</div>`;
+            const userMsg = input.value.toLowerCase();
+            input.value = '';
+            
+            setTimeout(() => {
+                let response = "[SISTEMA]: Processando...";
+                if(userMsg.includes("treino")) response = "[SISTEMA]: Foco em execução lenta hoje. Menos carga, mais contração.";
+                if(userMsg.includes("ouro")) response = "[SISTEMA]: O ouro é obtido através das Quests Diárias. Use-o com sabedoria.";
+                box.innerHTML += `<div class="text-cyan-500 font-bold">${response}</div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 600);
         }
     </script>
 </body>
