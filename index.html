@@ -3,286 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXUS - THE SYSTEM v30.0</title>
+    <title>NEXUS - THE PROTOCOL v32.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --system-blue: #00f2ff; --bg-dark: #020617; }
-        body { background: var(--bg-dark); color: white; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
-        .font-system { font-family: 'Orbitron', sans-serif; }
-        .hud-border { border: 1px solid rgba(0, 242, 255, 0.2); box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.05); }
-        .glass { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(12px); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        :root { --neon-blue: #00f2ff; --neon-red: #ff003c; --bg-main: #050505; --glass: rgba(20, 20, 30, 0.9); }
+        body { background: var(--bg-main); color: #e2e8f0; font-family: 'Rajdhani', sans-serif; overflow: hidden; }
+        .font-tech { font-family: 'Orbitron', sans-serif; }
         
-        /* Cores de Rank */
-        .rank-E { color: #94a3b8; text-shadow: 0 0 5px #94a3b8; border-color: #94a3b8; }
-        .rank-D { color: #f8fafc; text-shadow: 0 0 5px #f8fafc; border-color: #f8fafc; }
-        .rank-C { color: #4ade80; text-shadow: 0 0 5px #4ade80; border-color: #4ade80; }
-        .rank-B { color: #60a5fa; text-shadow: 0 0 10px #2563eb; border-color: #2563eb; }
-        .rank-A { color: #c084fc; text-shadow: 0 0 10px #9333ea; border-color: #9333ea; }
-        .rank-S { color: #facc15; text-shadow: 0 0 15px #ca8a04; border-color: #facc15; animation: pulse 2s infinite; }
+        /* Utilitários Visuais */
+        .glass-panel { background: var(--glass); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
+        .neon-text { text-shadow: 0 0 5px currentColor; }
         
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .tab-content { display: none; height: 100%; overflow-y: auto; padding-bottom: 100px; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .ai-msg { border-left: 2px solid var(--system-blue); padding: 10px; background: rgba(0, 242, 255, 0.05); border-radius: 0 10px 10px 0; margin-bottom: 10px; white-space: pre-line; font-size: 11px; }
-        .user-msg { text-align: right; color: #94a3b8; margin-bottom: 5px; font-weight: bold; font-size: 10px; }
+        /* Checkbox Customizado */
+        .task-checkbox { appearance: none; width: 20px; height: 20px; border: 2px solid #334155; border-radius: 4px; display: grid; place-content: center; transition: 0.2s; }
+        .task-checkbox::before { content: ""; width: 10px; height: 10px; background: var(--neon-blue); transform: scale(0); transition: 0.2s; }
+        .task-checkbox:checked { border-color: var(--neon-blue); }
+        .task-checkbox:checked::before { transform: scale(1); }
+
+        /* Setup Modal */
+        #setup-modal { z-index: 9999; background: black; }
+        .goal-card { border: 1px solid #333; padding: 15px; border-radius: 10px; transition: 0.3s; cursor: pointer; }
+        .goal-card:hover, .goal-card.selected { border-color: var(--neon-blue); background: rgba(0, 242, 255, 0.1); }
     </style>
 </head>
-<body class="pb-32">
+<body class="h-screen w-screen flex flex-col">
 
-    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-[70000] bg-cyan-500 text-black px-6 py-2 rounded-full font-black text-[10px] uppercase hidden shadow-[0_0_20px_rgba(6,182,212,0.4)]"></div>
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-cyan-500 text-black px-6 py-2 rounded-full font-black text-[10px] uppercase hidden shadow-[0_0_20px rgba(6,182,212,0.5)] tracking-widest"></div>
 
-    <div id="boot-screen" class="fixed inset-0 bg-black z-[60000] flex flex-col items-center justify-center text-cyan-500">
-        <div class="font-system text-xs tracking-[0.5em] mb-4 animate-pulse">NEXUS2026</div>
-        <div id="boot-log" class="text-[10px] font-mono opacity-50 h-4 uppercase">Sincronizando Banco de Dados...</div>
-    </div>
-
-    <div id="main-app" class="hidden">
-        <header class="p-6 sticky top-0 z-50 glass border-b border-cyan-500/20 flex justify-between items-start">
-            <div>
-                <h1 class="font-system text-lg font-black tracking-tighter text-white">NEXUS<span class="text-cyan-500">2026</span></h1>
-                <div class="flex items-center gap-3 mt-1">
-                    <div id="rank-badge" class="w-8 h-8 rounded border flex items-center justify-center font-system font-black text-lg rank-E">E</div>
-                    <div>
-                        <span class="text-[10px] font-bold font-system text-slate-400 uppercase">Level <span id="display-lvl">1</span></span>
-                        <div class="w-24 h-1.5 bg-slate-800 rounded-full mt-1 overflow-hidden">
-                            <div id="xp-bar" class="h-full bg-cyan-400 transition-all duration-700"></div>
-                        </div>
-                    </div>
-                </div>
+    <div id="setup-modal" class="fixed inset-0 flex flex-col items-center justify-center p-8 text-center hidden">
+        <h1 class="font-tech text-3xl text-cyan-500 mb-2 tracking-widest">SYSTEM SETUP</h1>
+        <p class="text-sm text-gray-400 mb-8">Defina o parâmetro da sua evolução.</p>
+        
+        <div class="grid gap-4 w-full max-w-sm mb-8">
+            <div onclick="selectGoal('cut')" id="goal-cut" class="goal-card">
+                <div class="text-xl mb-1">🔪</div>
+                <div class="font-bold text-white">PROTOCOLO ASSASSINO</div>
+                <div class="text-[10px] text-gray-400">Objetivo: Perder Gordura / Definição</div>
             </div>
-            <div class="text-right">
-                <p id="display-gold" class="text-yellow-500 font-system font-bold text-sm">0 G</p>
-                <button onclick="confirmReset()" class="text-[8px] text-slate-600 uppercase mt-2 block ml-auto">⚙️ Reset System</button>
-            </div>
-        </header>
-
-        <main class="p-6 space-y-6">
-            <section id="status" class="tab-content active space-y-6">
-                <div class="hud-border p-5 rounded-2xl glass grid grid-cols-3 gap-2 text-center">
-                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
-                        <p class="text-[7px] text-slate-500 uppercase">Força</p>
-                        <p id="stat-str" class="text-xl font-bold">10</p>
-                    </div>
-                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
-                        <p class="text-[7px] text-slate-500 uppercase">Agilidade</p>
-                        <p id="stat-agi" class="text-xl font-bold">10</p>
-                    </div>
-                    <div class="bg-white/5 p-3 rounded-xl border border-white/5">
-                        <p class="text-[7px] text-slate-500 uppercase">Vitalidade</p>
-                        <p id="stat-vit" class="text-xl font-bold">10</p>
-                    </div>
-                </div>
-
-                <div class="hud-border p-6 rounded-3xl border-purple-500/30">
-                    <h3 class="font-system text-[9px] text-purple-400 mb-4 uppercase">Missão do Dia</h3>
-                    <div id="quest-item" class="flex justify-between items-center bg-purple-500/10 p-4 rounded-xl border-l-4 border-purple-500">
-                        <span id="quest-title" class="text-xs font-bold uppercase tracking-tight">Completar Treino Diário</span>
-                        <button id="btn-quest" onclick="completeDaily()" class="bg-cyan-500 text-black px-4 py-1 rounded-lg font-black text-[9px]">CONCLUIR</button>
-                    </div>
-                </div>
-            </section>
-
-            <section id="market" class="tab-content space-y-4">
-                <h2 class="font-system text-[10px] text-yellow-500 tracking-widest uppercase">[ Inventário da Loja ]</h2>
-                <div id="market-list" class="space-y-4"></div>
-            </section>
-
-            <section id="guild" class="tab-content space-y-4">
-                <h2 class="font-system text-[10px] text-cyan-500 tracking-widest uppercase">[ Ranking Global ]</h2>
-                <div class="glass p-4 rounded-xl border border-white/5 flex items-center gap-4">
-                    <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-black text-xs font-system">S</div>
-                    <div>
-                        <p class="text-xs font-bold">Socio_Monarca <span class="text-[9px] text-yellow-500 ml-2">LVL 99</span></p>
-                        <p class="text-[9px] text-slate-500 italic">"O segredo é não pular o treino de perna."</p>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <div id="chat-window" class="fixed inset-x-4 bottom-24 h-[60vh] glass hud-border hidden flex-col z-[100] rounded-3xl overflow-hidden border-cyan-500/40">
-            <div class="p-4 border-b border-cyan-500/20 bg-cyan-500/10 flex justify-between items-center">
-                <span class="font-system text-[9px] text-cyan-400 tracking-widest">NEXUS AI v3.0</span>
-                <button onclick="toggleChat()" class="text-slate-500">✕</button>
-            </div>
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-6 font-mono space-y-4"></div>
-            <div class="p-4 bg-black/40 flex gap-2">
-                <input id="chat-input" placeholder="Pergunte sobre treinos ou dietas..." class="flex-1 bg-transparent outline-none text-xs text-white">
-                <button onclick="askAI()" class="text-cyan-500 font-system text-[10px] font-bold">ENVIAR</button>
+            <div onclick="selectGoal('bulk')" id="goal-bulk" class="goal-card">
+                <div class="text-xl mb-1">🛡️</div>
+                <div class="font-bold text-white">PROTOCOLO COLOSSO</div>
+                <div class="text-[10px] text-gray-400">Objetivo: Ganhar Massa / Força</div>
             </div>
         </div>
-
-        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] h-16 glass hud-border rounded-full flex items-center justify-around z-50">
-            <button onclick="nav('status')" class="text-cyan-500 nav-btn">👤</button>
-            <button onclick="nav('market')" class="text-slate-500 nav-btn">⚖️</button>
-            <button onclick="toggleChat()" id="ai-trigger" class="w-14 h-14 bg-cyan-500 rounded-full -mt-10 shadow-[0_0_20px_#00f2ff] flex items-center justify-center text-2xl">🧠</button>
-            <button onclick="nav('guild')" class="text-slate-500 nav-btn">🛡️</button>
-        </nav>
+        
+        <button onclick="finishSetup()" id="btn-start" class="bg-cyan-600 text-white px-8 py-3 rounded font-tech font-bold text-sm tracking-widest disabled:opacity-50 disabled:cursor-not-allowed" disabled>INICIAR SISTEMA</button>
     </div>
 
-    <script>
-        let db;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    <header class="p-5 flex justify-between items-center bg-black/80 border-b border-white/5 z-50">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="font-tech text-cyan-500 font-bold text-lg">NEXUS</span>
+                <span id="header-rank" class="text-[9px] border border-slate-600 px-1 rounded text-slate-400">E-RANK</span>
+            </div>
+            <div class="text-[9px] text-slate-500 uppercase tracking-widest mt-1">Level <span id="header-lvl">1</span> • <span id="header-goal">...</span></div>
+        </div>
+        <div class="text-right">
+            <div class="font-tech text-yellow-500 text-sm font-bold"><span id="header-gold">0</span> G</div>
+            <button onclick="hardReset()" class="text-[8px] text-red-800 uppercase hover:text-red-500">Reset</button>
+        </div>
+    </header>
+
+    <main class="flex-1 relative overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
         
+        <section id="tab-dash" class="tab-content active p-6 space-y-6">
+            
+            <div class="glass-panel p-4 rounded-xl flex items-center gap-4">
+                <div class="relative w-16 h-16 flex items-center justify-center">
+                    <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                        <path class="text-slate-800" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"/>
+                        <path id="circle-xp" class="text-cyan-500 drop-shadow-[0_0_5px_rgba(6,182,212,0.8)]" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
+                    </svg>
+                    <span class="absolute text-xs font-bold text-white"><span id="xp-perc">0</span>%</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white">Evolução Atual</h3>
+                    <p class="text-[10px] text-slate-400">XP Acumulado: <span id="display-xp">0</span> / <span id="display-next">500</span></p>
+                    <p class="text-[9px] text-cyan-400 mt-1 uppercase tracking-widest">Continue forçando.</p>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="font-tech text-xs text-slate-500 uppercase tracking-[0.2em] mb-3 ml-1">Protocolo Diário</h2>
+                <div class="space-y-3">
+                    <div class="glass-panel p-3 rounded-lg flex items-center justify-between border-l-2 border-blue-500">
+                        <div>
+                            <p class="text-xs font-bold text-white">Hidratação (3L)</p>
+                            <p class="text-[9px] text-slate-400">Combustível básico.</p>
+                        </div>
+                        <input type="checkbox" class="task-checkbox" id="task-water" onchange="checkTask('water')">
+                    </div>
+                    
+                    <div class="glass-panel p-3 rounded-lg flex items-center justify-between border-l-2 border-green-500">
+                        <div>
+                            <p id="label-diet" class="text-xs font-bold text-white">Bater Meta Proteica</p>
+                            <p class="text-[9px] text-slate-400">Construção muscular.</p>
+                        </div>
+                        <input type="checkbox" class="task-checkbox" id="task-diet" onchange="checkTask('diet')">
+                    </div>
+
+                    <div class="glass-panel p-3 rounded-lg flex items-center justify-between border-l-2 border-red-500">
+                        <div>
+                            <p class="text-xs font-bold text-white">Treino de Hoje</p>
+                            <p class="text-[9px] text-slate-400">Superar limites anteriores.</p>
+                        </div>
+                        <input type="checkbox" class="task-checkbox" id="task-train" onchange="checkTask('train')">
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="flex justify-between text-[9px] text-slate-500 mb-1 uppercase">
+                        <span>Conclusão do Dia</span>
+                        <span id="day-perc">0%</span>
+                    </div>
+                    <div class="h-1 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="day-bar" class="h-full bg-white transition-all duration-500 w-0"></div>
+                    </div>
+                    <button id="btn-finish-day" onclick="finishDay()" class="w-full mt-4 bg-slate-800 text-slate-500 text-[10px] font-bold py-3 rounded uppercase tracking-widest transition-all" disabled>
+                        Reivindicar Recompensas
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="tab-intel" class="tab-content flex flex-col p-4">
+            <div id="chat-box" class="flex-1 overflow-y-auto space-y-3 mb-3 pr-1">
+                <div class="bg-cyan-500/10 border-l-2 border-cyan-500 p-3 rounded-r-lg text-[10px] leading-relaxed text-cyan-100">
+                    SISTEMA: Conectado.<br>
+                    Seu objetivo é <span id="ai-goal-ref" class="font-bold">...</span>.<br>
+                    Pergunte-me sobre "Dieta", "Treino A", "Treino B" ou "Dicas".
+                </div>
+            </div>
+            <form onsubmit="askAI(event)" class="flex gap-2">
+                <input id="ai-input" type="text" placeholder="Digite seu comando..." class="flex-1 bg-slate-900 border border-slate-700 rounded p-3 text-xs text-white outline-none focus:border-cyan-500 transition">
+                <button type="submit" class="bg-cyan-600 px-4 rounded text-white font-bold">></button>
+            </form>
+        </section>
+
+    </main>
+
+    <nav class="glass-panel border-t border-white/5 pb-6 pt-2 z-50 fixed bottom-0 w-full">
+        <div class="flex justify-around items-center">
+            <button onclick="nav('dash')" class="nav-btn text-cyan-400 flex flex-col items-center p-2 w-16">
+                <span class="text-xl mb-1">⚡</span>
+                <span class="text-[8px] font-bold uppercase tracking-widest">Hoje</span>
+            </button>
+            <button onclick="nav('intel')" class="nav-btn text-slate-600 flex flex-col items-center p-2 w-16">
+                <span class="text-xl mb-1">🧠</span>
+                <span class="text-[8px] font-bold uppercase tracking-widest">Intel</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        // --- CORE DATA ---
+        let db = {
+            setup: false,
+            goal: null, // 'cut' or 'bulk'
+            lvl: 1, xp: 0, nextXp: 500, gold: 0,
+            streak: 0,
+            lastDate: null,
+            tasks: { water: false, diet: false, train: false }
+        };
+
         const KNOWLEDGE = {
-            workouts: {
-                peito: "⚔️ PROTOCOLO PEITORAL:\n1. Supino Reto: 4x10\n2. Inclinado: 3x12\n3. Crossover: 3x15\nDica: Mantenha os ombros para trás.",
-                costas: "⚔️ PROTOCOLO DORSAL:\n1. Puxada Alta: 4x10\n2. Remada Baixa: 4x12\n3. Barra Fixa: 3x Falha",
-                perna: "⚔️ PROTOCOLO INFERIOR:\n1. Agachamento: 4x10\n2. Leg Press: 3x15\n3. Extensora: 4x12"
+            cut: {
+                intro: "Foco: DÉFICIT CALÓRICO e PROTEÍNA ALTA. Treinos intensos para manter massa magra.",
+                diet: "Almoço: Metade do prato de salada, 1/4 proteína magra, 1/4 carbo complexo.",
+                train: "Priorize exercícios compostos + 20min de cardio pós-treino."
             },
-            diets: {
-                emagrecer: "🥗 DIETA DE DEFINIÇÃO (CUTTING):\n• 2.0g Prot/kg | 1.5g Carb/kg\n• Café: Ovos e Aveia\n• Almoço: Frango, Legumes e 100g Arroz\n• Janta: Peixe e Salada.",
-                massa: "🥩 DIETA DE GANHO (BULKING):\n• 2.0g Prot/kg | 4.0g Carb/kg\n• Café: Ovos, Pão e Banana\n• Almoço: Carne, Feijão e 250g Arroz\n• Janta: Macarrão com Frango."
+            bulk: {
+                intro: "Foco: SUPERÁVIT CALÓRICO LIMPO. Progressão de carga é obrigatória.",
+                diet: "Coma mais do que gasta. Adicione aveia, ovos e arroz em quantidades maiores.",
+                train: "Descanse mais entre séries (2-3min). Foque em bater seu PR de carga."
             }
         };
 
-        function playSound(freq, type, duration) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        }
-
+        // --- INIT & SETUP ---
         function init() {
-            const saved = localStorage.getItem('Nexus_v30_Final');
-            db = saved ? JSON.parse(saved) : { lvl: 1, xp: 0, nextLvl: 1000, str: 10, agi: 10, vit: 10, gold: 100, lastQuestDate: "" };
+            const saved = localStorage.getItem('Nexus_v32_Protocol');
+            if(saved) db = JSON.parse(saved);
+
+            // Verifica troca de dia para resetar tarefas
+            const today = new Date().toDateString();
+            if(db.lastDate !== today) {
+                db.tasks = { water: false, diet: false, train: false };
+                db.lastDate = today;
+                save();
+            }
+
+            if(!db.setup) {
+                document.getElementById('setup-modal').classList.remove('hidden');
+                document.getElementById('setup-modal').classList.add('flex');
+            } else {
+                updateUI();
+            }
         }
 
-        function save() { localStorage.setItem('Nexus_v30_Final', JSON.stringify(db)); }
+        let selectedGoalTemp = null;
+        function selectGoal(goal) {
+            selectedGoalTemp = goal;
+            document.querySelectorAll('.goal-card').forEach(c => c.classList.remove('selected', 'border-cyan-500'));
+            document.getElementById(`goal-${goal}`).classList.add('selected', 'border-cyan-500');
+            document.getElementById('btn-start').disabled = false;
+        }
 
-        function getRankInfo(lvl) {
-            if(lvl >= 50) return { r: 'S', c: 'rank-S' };
-            if(lvl >= 40) return { r: 'A', c: 'rank-A' };
-            if(lvl >= 30) return { r: 'B', c: 'rank-B' };
-            if(lvl >= 20) return { r: 'C', c: 'rank-C' };
-            if(lvl >= 10) return { r: 'D', c: 'rank-D' };
-            return { r: 'E', c: 'rank-E' };
+        function finishSetup() {
+            db.goal = selectedGoalTemp;
+            db.setup = true;
+            db.lastDate = new Date().toDateString();
+            save();
+            document.getElementById('setup-modal').style.display = 'none';
+            updateUI();
+        }
+
+        // --- GAMEPLAY LOOP ---
+        function checkTask(task) {
+            db.tasks[task] = document.getElementById(`task-${task}`).checked;
+            save();
+            updateUI();
         }
 
         function updateUI() {
-            document.getElementById('display-lvl').innerText = db.lvl;
-            document.getElementById('display-gold').innerText = `${db.gold} G`;
-            document.getElementById('stat-str').innerText = db.str;
-            document.getElementById('stat-agi').innerText = db.agi;
-            document.getElementById('stat-vit').innerText = db.vit;
-            document.getElementById('xp-bar').style.width = ((db.xp / db.nextLvl) * 100) + "%";
+            // Header
+            document.getElementById('header-lvl').innerText = db.lvl;
+            document.getElementById('header-gold').innerText = db.gold;
+            document.getElementById('header-goal').innerText = db.goal === 'cut' ? 'PROTOCOLO ASSASSINO' : 'PROTOCOLO COLOSSO';
+            document.getElementById('ai-goal-ref').innerText = db.goal === 'cut' ? 'QUEIMA DE GORDURA' : 'GANHO DE FORÇA';
 
-            const rank = getRankInfo(db.lvl);
-            const badge = document.getElementById('rank-badge');
-            badge.innerText = rank.r;
-            badge.className = `w-8 h-8 rounded border flex items-center justify-center font-system font-black text-lg ${rank.c}`;
+            // Tasks States
+            document.getElementById('task-water').checked = db.tasks.water;
+            document.getElementById('task-diet').checked = db.tasks.diet;
+            document.getElementById('task-train').checked = db.tasks.train;
+            
+            // Texto dinâmico da tarefa de dieta
+            document.getElementById('label-diet').innerText = db.goal === 'cut' ? "Manter Déficit Calórico" : "Bater Superávit Limpo";
 
-            const today = new Date().toISOString().split('T')[0];
-            const btn = document.getElementById('btn-quest');
-            if(db.lastQuestDate === today) {
-                btn.disabled = true;
-                btn.innerText = "CONCLUÍDO";
-                document.getElementById('quest-item').classList.replace('border-purple-500', 'border-slate-500');
+            // Progress Calculations
+            const completedCount = Object.values(db.tasks).filter(Boolean).length;
+            const dayPerc = Math.floor((completedCount / 3) * 100);
+            
+            document.getElementById('day-perc').innerText = `${dayPerc}%`;
+            document.getElementById('day-bar').style.width = `${dayPerc}%`;
+
+            // Botão de Finalizar Dia
+            const btnFinish = document.getElementById('btn-finish-day');
+            if(dayPerc === 100) {
+                btnFinish.disabled = false;
+                btnFinish.classList.remove('bg-slate-800', 'text-slate-500');
+                btnFinish.classList.add('bg-cyan-500', 'text-black', 'shadow-[0_0_15px_#06b6d4]');
+                btnFinish.innerText = "COMPLETAR DIA (+300 XP)";
+            } else {
+                btnFinish.disabled = true;
+                btnFinish.classList.add('bg-slate-800', 'text-slate-500');
+                btnFinish.classList.remove('bg-cyan-500', 'text-black', 'shadow-[0_0_15px_#06b6d4]');
+                btnFinish.innerText = "COMPLETE AS TAREFAS";
             }
 
-            if(db.xp >= db.nextLvl) {
-                db.lvl++; db.xp = 0; db.nextLvl *= 1.3;
-                playSound(600, 'square', 0.4);
-                showToast("SISTEMA: LEVEL UP!");
-                save(); updateUI();
+            // Circle XP
+            const xpPerc = Math.min(100, (db.xp / db.nextXp) * 100);
+            document.getElementById('xp-perc').innerText = Math.floor(xpPerc);
+            document.getElementById('circle-xp').setAttribute('stroke-dasharray', `${xpPerc}, 100`);
+            document.getElementById('display-xp').innerText = db.xp;
+            document.getElementById('display-next').innerText = db.nextXp;
+        }
+
+        function finishDay() {
+            // Prevenir múltiplos cliques
+            if(!Object.values(db.tasks).every(Boolean)) return;
+            
+            db.xp += 300;
+            db.gold += 100;
+            db.streak++;
+            
+            // Reset visual (dados resetam no próximo load/dia)
+            alert(`DIA CONCLUÍDO!\n+300 XP\n+100 GOLD\nSérie Atual: ${db.streak} dias`);
+            
+            // Level Up Check
+            if(db.xp >= db.nextXp) {
+                db.lvl++;
+                db.xp -= db.nextXp;
+                db.nextXp = Math.floor(db.nextXp * 1.2);
+                alert("LEVEL UP! VOCÊ FICOU MAIS FORTE.");
             }
+            
+            // Reset tasks temporário para não farmar infinito
+            db.tasks = { water: false, diet: false, train: false };
+            save();
+            updateUI();
         }
 
-        function completeDaily() {
-            const today = new Date().toISOString().split('T')[0];
-            if(db.lastQuestDate === today) return;
-            playSound(400, 'sine', 0.1);
-            db.gold += 250; db.xp += 500;
-            db.lastQuestDate = today;
-            showToast("MISSÃO CONCLUÍDA! +500 XP");
-            save(); updateUI();
-        }
-
-        function askAI() {
-            const input = document.getElementById('chat-input');
+        // --- AI INTEL ---
+        function askAI(e) {
+            e.preventDefault();
+            const input = document.getElementById('ai-input');
             const msg = input.value.trim().toLowerCase();
+            const box = document.getElementById('chat-box');
             if(!msg) return;
-            playSound(800, 'sine', 0.05);
-            const box = document.getElementById('chat-messages');
-            box.innerHTML += `<div class="user-msg">[HUNTER]: ${input.value}</div>`;
+
+            // User Msg
+            box.innerHTML += `<div class="text-right text-[10px] text-slate-400 mb-2 font-bold">${input.value}</div>`;
             input.value = '';
 
+            // AI Logic Simples
             setTimeout(() => {
-                let reply = "[SISTEMA]: Comando desconhecido. Tente 'Treino de Peito' ou 'Dieta para Massa'.";
-                if(msg.includes('peito')) reply = KNOWLEDGE.workouts.peito;
-                else if(msg.includes('costa')) reply = KNOWLEDGE.workouts.costas;
-                else if(msg.includes('perna')) reply = KNOWLEDGE.workouts.perna;
-                else if(msg.includes('emagrecer') || msg.includes('secar')) reply = KNOWLEDGE.diets.emagrecer;
-                else if(msg.includes('massa') || msg.includes('bulking')) reply = KNOWLEDGE.diets.massa;
+                let reply = "Informação não encontrada no banco de dados.";
                 
-                box.innerHTML += `<div class="ai-msg font-mono text-cyan-400">${reply}</div>`;
+                if(msg.includes('dica')) reply = KNOWLEDGE[db.goal].intro;
+                else if(msg.includes('dieta') || msg.includes('comer')) reply = KNOWLEDGE[db.goal].diet;
+                else if(msg.includes('treino')) reply = KNOWLEDGE[db.goal].train;
+                else if(msg.includes('peito')) reply = "Supino Reto + Inclinado Halteres + Crossover. Foco em carga.";
+                else if(msg.includes('costas')) reply = "Puxada Alta + Remada Curvada + Terra. Volume alto.";
+                
+                box.innerHTML += `<div class="bg-cyan-500/10 border-l-2 border-cyan-500 p-3 rounded-r-lg text-[10px] leading-relaxed text-cyan-100 mb-3">${reply}</div>`;
                 box.scrollTop = box.scrollHeight;
-            }, 400);
+            }, 500);
         }
 
-        function confirmReset() {
-            if(confirm("Deseja apagar todos os dados do Sistema?")) {
-                localStorage.removeItem('Nexus_v30_Final');
+        function nav(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${id}`).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('text-cyan-400');
+                b.classList.add('text-slate-600');
+            });
+            event.currentTarget.classList.add('text-cyan-400');
+            event.currentTarget.classList.remove('text-slate-600');
+        }
+
+        function save() { localStorage.setItem('Nexus_v32_Protocol', JSON.stringify(db)); }
+        
+        function hardReset() {
+            if(confirm("Reiniciar o sistema do zero?")) {
+                localStorage.removeItem('Nexus_v32_Protocol');
                 location.reload();
             }
         }
 
-        function nav(id) {
-            playSound(200, 'sine', 0.05);
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-cyan-500', 'text-slate-500'));
-            event.currentTarget.classList.replace('text-slate-500', 'text-cyan-500');
-        }
-
-        function toggleChat() {
-            playSound(500, 'sine', 0.05);
-            const chat = document.getElementById('chat-window');
-            chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
-        }
-
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg; t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 2500);
-        }
-
-        function renderShop() {
-            const list = [
-                { id: 1, name: 'Creatina Monarca', price: 400, icon: '🧪', buff: 'str', desc: '+2 Força' },
-                { id: 2, name: 'Whey de Yggdrasil', price: 350, icon: '🥤', buff: 'vit', desc: '+2 Vitalidade' }
-            ];
-            document.getElementById('market-list').innerHTML = list.map(item => `
-                <div class="hud-border p-4 rounded-2xl glass flex justify-between items-center border-white/5">
-                    <div class="flex items-center gap-4"><span class="text-2xl">${item.icon}</span><div><p class="text-xs font-bold uppercase">${item.name}</p><p class="text-[8px] text-slate-400">${item.desc}</p></div></div>
-                    <button onclick="buyItem(${item.price}, '${item.buff}')" class="bg-yellow-500 text-black px-4 py-2 rounded-lg font-black text-[9px]">${item.price}G</button>
-                </div>`).join('');
-        }
-
-        function buyItem(price, buff) {
-            if(db.gold >= price) { 
-                db.gold -= price; db[buff] += 2; 
-                playSound(1000, 'sine', 0.1);
-                save(); updateUI(); showToast("ITEM EQUIPADO!"); 
-            } else showToast("OURO INSUFICIENTE");
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            init();
-            setTimeout(() => {
-                document.getElementById('boot-screen').style.display = 'none';
-                document.getElementById('main-app').classList.remove('hidden');
-                renderShop();
-                updateUI();
-            }, 800);
-        });
+        init();
     </script>
 </body>
 </html>
